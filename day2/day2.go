@@ -2,34 +2,46 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 	"strings"
 )
 
-func parse(d string) int {
+type Item int
+
+const (
+	Rock     Item = 1
+	Paper    Item = 2
+	Scissors Item = 3
+)
+
+func parse(d string) Item {
 	if d == "A" || d == "X" {
-		return 1
+		return Rock
 	} else if d == "B" || d == "Y" {
-		return 2
+		return Paper
 	} else {
-		return 3
+		return Scissors
 	}
 }
 
-func roundScore(act []int) int {
-	won := (act[1] == 1 && act[0] == 3) || (act[1]-act[0]) == 1
-	draw := act[1] == act[0]
-	if won {
-		return act[1] + 6
-	} else if draw {
-		return act[1] + 3
+func beats(my, opponent Item) bool {
+	return (my == Rock && opponent == Scissors) || (my-opponent) == 1
+}
+
+func roundScore(act []Item) int {
+	my := act[1]
+	opponent := act[0]
+	if beats(my, opponent) {
+		return int(my + 6)
+	} else if my == opponent {
+		return int(my + 3)
 	} else {
-		return act[1]
+		return int(my)
 	}
 }
 
-func calcTotalScore(values [][]int) int {
+func calcTotalScore(values [][]Item) int {
 	totalScore := 0
 
 	for _, p := range values {
@@ -39,7 +51,7 @@ func calcTotalScore(values [][]int) int {
 	return totalScore
 }
 
-func substitute(values [][]int) {
+func substitute(values [][]Item) {
 	for i := 0; i < len(values); i++ {
 		if values[i][1] == 1 {
 			values[i][1] = values[i][0] - 1
@@ -58,18 +70,18 @@ func substitute(values [][]int) {
 }
 
 func main() {
-	rawContent, err := ioutil.ReadFile("data.txt")
+	rawContent, err := os.ReadFile("data.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
 	content := string(rawContent)
 	lines := strings.Split(strings.TrimSpace(content), "\n")
 
-	values := make([][]int, 0, len(lines))
+	values := make([][]Item, 0, len(lines))
 
 	for _, l := range lines {
 		line := strings.Split(l, " ")
-		v := []int{parse(line[0]), parse(line[1])}
+		v := []Item{parse(line[0]), parse(line[1])}
 		values = append(values, v)
 	}
 
