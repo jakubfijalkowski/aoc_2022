@@ -83,7 +83,7 @@ func part2(ops []Microop) {
 			fmt.Print(".")
 		}
 
-		if i == 39 || ((i-39)%40 == 0) {
+		if i % 40 == 39 {
 			fmt.Println()
 		}
 
