@@ -277,52 +277,59 @@ func stepPart1(dir Direction, mapData *MapData, prevPos Point) (Point, Direction
 	return nextPos, dir
 }
 
-func (p Point) yAsXOffset(currSide, nextSide *Side) Point {
-	return Point{p.y - currSide.y + nextSide.x, 0}
+func mkX(x int) Point {
+	return Point{x, 0}
+}
+func mkY(y int) Point {
+	return Point{0, y}
 }
 
-func (p Point) yAsYOffset(currSide, nextSide *Side) Point {
-	return Point{0, p.y - currSide.y + nextSide.y}
+func (p Point) yX(currSide *Side) Point {
+	return mkX(p.y - currSide.y)
 }
 
-func (p Point) xAsXOffset(currSide, nextSide *Side) Point {
-	return Point{p.x - currSide.x + nextSide.x, 0}
+func (p Point) yY(currSide *Side) Point {
+	return mkY(p.y - currSide.y)
 }
 
-func (p Point) xAsYOffset(currSide, nextSide *Side) Point {
-	return Point{0, p.x - currSide.x + nextSide.y}
+func (p Point) xX(currSide *Side) Point {
+	return mkX(p.x - currSide.x)
 }
 
-func (p Point) yFarAsXOffset(currSide, nextSide *Side) Point {
-	return Point{currSide.y + currSide.size - 1 - p.y + nextSide.x, 0}
+func (p Point) xY(currSide *Side) Point {
+	return mkY(p.x - currSide.x)
 }
 
-func (p Point) yFarAsYOffset(currSide, nextSide *Side) Point {
-	return Point{0, currSide.y + currSide.size - 1 - p.y + nextSide.y}
+func (p Point) yXFar(currSide *Side) Point {
+	return mkX(currSide.y - p.y + currSide.size - 1)
 }
 
-func (p Point) xFarAsXOffset(currSide, nextSide *Side) Point {
-	return Point{currSide.x + currSide.size - 1 - p.x + nextSide.x, 0}
+func (p Point) yYFar(currSide *Side) Point {
+	return mkY(currSide.y - p.y + currSide.size - 1)
 }
 
-func (p Point) xFarAsYOffset(currSide, nextSide *Side) Point {
-	return Point{0, currSide.x + currSide.size - 1 - p.x + nextSide.y}
+func (p Point) xXFar(currSide *Side) Point {
+	return mkX(currSide.x - p.x + currSide.size - 1)
+}
+
+func (p Point) xYFar(currSide *Side) Point {
+	return mkY(currSide.x - p.x + currSide.size - 1)
 }
 
 func (p Point) leftOf(side *Side) Point {
-	return Point{side.x, p.y}
+	return Point{side.x, p.y + side.y}
 }
 
 func (p Point) topOf(side *Side) Point {
-	return Point{p.x, side.y}
+	return Point{p.x + side.x, side.y}
 }
 
 func (p Point) rightOf(side *Side) Point {
-	return Point{side.x + side.size - 1, p.y}
+	return Point{side.x + side.size - 1, p.y + side.y}
 }
 
 func (p Point) bottomOf(side *Side) Point {
-	return Point{p.x, side.y + side.size - 1}
+	return Point{p.x + side.x, side.y + side.size - 1}
 }
 
 func stepPart2(dir Direction, mapData *MapData, currPos Point) (Point, Direction) {
@@ -336,17 +343,17 @@ func stepPart2(dir Direction, mapData *MapData, currPos Point) (Point, Direction
 	toTop := dir == DirUp
 	toBottom := dir == DirDown
 
-	if nextSide == nil || nextSide.id != currSide.id {
+	if nextSide == nil {
 		if currSide.id == 0 {
 			if toTop {
 				nextSide = &mapData.sides[1]
 				dir = DirRight
-				nextPos = nextPos.xAsYOffset(currSide, nextSide).leftOf(nextSide)
+				nextPos = nextPos.xY(currSide).leftOf(nextSide)
 			}
 			if toLeft {
 				nextSide = &mapData.sides[2]
 				dir = DirRight
-				nextPos = nextPos.yFarAsYOffset(currSide, nextSide).leftOf(nextSide)
+				nextPos = nextPos.yYFar(currSide).leftOf(nextSide)
 			}
 		}
 
@@ -354,17 +361,17 @@ func stepPart2(dir Direction, mapData *MapData, currPos Point) (Point, Direction
 			if toLeft {
 				nextSide = &mapData.sides[0]
 				dir = DirDown
-				nextPos = nextPos.yAsXOffset(currSide, nextSide).topOf(nextSide)
+				nextPos = nextPos.yX(currSide).topOf(nextSide)
 			}
 			if toBottom {
 				nextSide = &mapData.sides[5]
 				dir = DirDown
-				nextPos = nextPos.xFarAsXOffset(currSide, nextSide).topOf(nextSide)
+				nextPos = nextPos.xX(currSide).topOf(nextSide)
 			}
 			if toRight {
 				nextSide = &mapData.sides[4]
 				dir = DirUp
-				nextPos = nextPos.yAsXOffset(currSide, nextSide).bottomOf(nextSide)
+				nextPos = nextPos.yX(currSide).bottomOf(nextSide)
 			}
 		}
 
@@ -372,12 +379,12 @@ func stepPart2(dir Direction, mapData *MapData, currPos Point) (Point, Direction
 			if toLeft {
 				nextSide = &mapData.sides[0]
 				dir = DirRight
-				nextPos = nextPos.yFarAsYOffset(currSide, nextSide).leftOf(nextSide)
+				nextPos = nextPos.yYFar(currSide).leftOf(nextSide)
 			}
 			if toTop {
 				nextSide = &mapData.sides[3]
 				dir = DirRight
-				nextPos = nextPos.xAsYOffset(currSide, nextSide).leftOf(nextSide)
+				nextPos = nextPos.xY(currSide).leftOf(nextSide)
 			}
 		}
 
@@ -385,12 +392,12 @@ func stepPart2(dir Direction, mapData *MapData, currPos Point) (Point, Direction
 			if toLeft {
 				nextSide = &mapData.sides[2]
 				dir = DirDown
-				nextPos = nextPos.yAsXOffset(currSide, nextSide).topOf(nextSide)
+				nextPos = nextPos.yX(currSide).topOf(nextSide)
 			}
 			if toRight {
 				nextSide = &mapData.sides[5]
-				dir = DirDown
-				nextPos = nextPos.yAsXOffset(currSide, nextSide).bottomOf(nextSide)
+				dir = DirUp
+				nextPos = nextPos.yX(currSide).bottomOf(nextSide)
 			}
 		}
 
@@ -398,12 +405,12 @@ func stepPart2(dir Direction, mapData *MapData, currPos Point) (Point, Direction
 			if toRight {
 				nextSide = &mapData.sides[5]
 				dir = DirLeft
-				nextPos = nextPos.yFarAsYOffset(currSide, nextSide).rightOf(nextSide)
+				nextPos = nextPos.yYFar(currSide).rightOf(nextSide)
 			}
 			if toBottom {
 				nextSide = &mapData.sides[1]
 				dir = DirLeft
-				nextPos = nextPos.xAsYOffset(currSide, nextSide).rightOf(nextSide)
+				nextPos = nextPos.xY(currSide).rightOf(nextSide)
 			}
 		}
 
@@ -411,17 +418,17 @@ func stepPart2(dir Direction, mapData *MapData, currPos Point) (Point, Direction
 			if toTop {
 				nextSide = &mapData.sides[1]
 				dir = DirUp
-				nextPos = nextPos.xFarAsXOffset(currSide, nextSide).bottomOf(nextSide)
+				nextPos = nextPos.xX(currSide).bottomOf(nextSide)
 			}
 			if toRight {
 				nextSide = &mapData.sides[4]
 				dir = DirLeft
-				nextPos = nextPos.yFarAsYOffset(currSide, nextSide).rightOf(nextSide)
+				nextPos = nextPos.yYFar(currSide).rightOf(nextSide)
 			}
 			if toBottom {
 				nextSide = &mapData.sides[3]
 				dir = DirLeft
-				nextPos = nextPos.xAsYOffset(currSide, nextSide).rightOf(nextSide)
+				nextPos = nextPos.xY(currSide).rightOf(nextSide)
 			}
 		}
 	}
